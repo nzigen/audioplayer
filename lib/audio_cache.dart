@@ -17,8 +17,8 @@ class AudioCache {
 
   /// This is the path inside your assets folder where your files lie.
   ///
-  /// For example, Flame uses the prefix 'audio/' (must include the slash!).
-  /// Your files will be found at assets/<prefix><fileName>
+  /// For example, Flame uses the prefix 'assets/audio/' (must include the slash!).
+  /// Your files will be found at <prefix><fileName>
   String prefix;
 
   /// This is an instance of AudioPlayer that, if present, will always be used.
@@ -47,7 +47,7 @@ class AudioCache {
   }
 
   Future<ByteData> _fetchAsset(String fileName) async {
-    return await rootBundle.load('assets/$prefix$fileName');
+    return await rootBundle.load('$prefix$fileName');
   }
 
   Future<File> fetchToMemory(String fileName) async {
