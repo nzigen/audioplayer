@@ -51,7 +51,9 @@ class AudioCache {
   }
 
   Future<File> fetchToMemory(String fileName) async {
-    final file = new File('${(await getTemporaryDirectory()).path}/$fileName');
+    final fullPath = '${(await getTemporaryDirectory()).path}/$fileName';
+    await Directory(fullPath.replaceFirst(new RegExp(r"/.*?$"), '')).create(recursive: true);
+    final file = new File(fullPath);
     return await file
         .writeAsBytes((await _fetchAsset(fileName)).buffer.asUint8List());
   }
