@@ -24,7 +24,7 @@ class AudioCache {
 
   /// This is an instance of AudioPlayer that, if present, will always be used.
   ///
-  /// If not set, the AudioCache will create and return a new instance of AudioPlayer every call, allowing for simultaneous calls.
+  /// If not set, the AudioCache will create and return a instance of AudioPlayer every call, allowing for simultaneous calls.
   /// If this is set, every call will overwrite previous calls.
   AudioPlayer fixedPlayer;
 
@@ -59,6 +59,7 @@ class AudioCache {
   Future<File> fetchToMemory(String fileName) async {
     final Uri uri = Uri.parse(fileName);
     String fullPath;
+    
     final temporaryPath = (await getTemporaryDirectory()).path;
     final isNetwork = uri.scheme == 'http' || uri.scheme == 'https';
     if (isNetwork) {
@@ -66,10 +67,13 @@ class AudioCache {
     } else {
       fullPath = '$temporaryPath/$fileName';
     }
+    final file = File(fullPath);
+    if (await file.exists()) {
+      return file;
+    }
     final splitted = fullPath.split('/');
     final replaced = splitted.sublist(0, splitted.length - 1).join('/');
-    await new Directory(replaced).create(recursive: true);
-    final file = new File(fullPath);
+    await Directory(replaced).create(recursive: true);
     if (isNetwork) {
       return await file.writeAsBytes(await _fetchNetwork(fileName));
     }
@@ -94,13 +98,13 @@ class AudioCache {
   }
 
   AudioPlayer _player() {
-    return fixedPlayer ?? new AudioPlayer();
+    return fixedPlayer ?? AudioPlayer();
   }
 
   /// Plays the given [fileName].
   ///
   /// If the file is already cached, it plays imediatelly. Otherwise, first waits for the file to load (might take a few milliseconds).
-  /// It creates a new instance of [AudioPlayer], so it does not affect other audios playing (unless you specify a [fixedPlayer], in which case it always use the same).
+  /// It creates a instance of [AudioPlayer], so it does not affect other audios playing (unless you specify a [fixedPlayer], in which case it always use the same).
   /// The instance is returned, to allow later access (either way).
   Future<AudioPlayer> play(String fileName, {double volume = 1.0}) async {
     File file = await load(fileName);
