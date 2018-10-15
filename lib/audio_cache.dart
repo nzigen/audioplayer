@@ -62,7 +62,7 @@ class AudioCache {
     final temporaryPath = (await getTemporaryDirectory()).path;
     final isNetwork = uri.scheme == 'http' || uri.scheme == 'https';
     if (isNetwork) {
-      fullPath = '$temporaryPath/${uri.host}/${uri.path}';
+      fullPath = '$temporaryPath/${uri.host}${uri.path}';
     } else {
       fullPath = '$temporaryPath/$fileName';
     }
