@@ -57,7 +57,7 @@ class AudioCache {
   }
 
   Future<File> fetchToMemory(String fileName) async {
-    final Uri uri = Uri.dataFromString(fileName);
+    final Uri uri = Uri.parse(fileName);
     String fullPath;
     final temporaryPath = (await getTemporaryDirectory()).path;
     final isNetwork = uri.scheme == 'http' || uri.scheme == 'https';
