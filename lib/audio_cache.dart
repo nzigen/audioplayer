@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
 import 'audioplayers.dart';
+import 'package:http/http.dart' as http;
 
 /// This class represents a cache for Local Assets to be played.
 ///
@@ -46,18 +47,33 @@ class AudioCache {
     AudioPlayer.logEnabled = false;
   }
 
-  Future<ByteData> _fetchAsset(String fileName) async {
-    return await rootBundle.load('$prefix$fileName');
+  Future<Uint8List> _fetchAsset(String fileName) async {
+    return (await rootBundle.load('$prefix$fileName')).buffer.asUint8List();
+  }
+
+  Future<Uint8List> _fetchNetwork(String url) async {
+    final response = await http.get(url);
+    return response.bodyBytes;
   }
 
   Future<File> fetchToMemory(String fileName) async {
-    final fullPath = '${(await getTemporaryDirectory()).path}/$fileName';
+    final Uri uri = Uri.dataFromString(fileName);
+    String fullPath;
+    final temporaryPath = (await getTemporaryDirectory()).path;
+    final isNetwork = uri.scheme == 'http' || uri.scheme == 'https';
+    if (isNetwork) {
+      fullPath = '$temporaryPath/${uri.host}/${uri.path}';
+    } else {
+      fullPath = '$temporaryPath/$fileName';
+    }
     final splitted = fullPath.split('/');
     final replaced = splitted.sublist(0, splitted.length - 1).join('/');
     await new Directory(replaced).create(recursive: true);
     final file = new File(fullPath);
-    return await file
-        .writeAsBytes((await _fetchAsset(fileName)).buffer.asUint8List());
+    if (isNetwork) {
+      return await file.writeAsBytes(await _fetchNetwork(fileName));
+    }
+    return await file.writeAsBytes(await _fetchAsset(fileName));
   }
 
   /// Load all the [fileNames] provided to the cache.
